@@ -1,0 +1,23 @@
+{
+  "name": "@laboralphy/pixel-processor",
+  "version": "1.0.0",
+  "description": "The pixel processor is used to apply a callback function to each pixel of an existing canvas, or a newly created one.",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Laboralphy/o876-pixel-processor.git"
+  },
+  "keywords": ["canvas", "html5", "laboralphy", "pixels", "rgba", "color", "graphics"],
+  "author": "Raphaël Marandet",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Laboralphy/o876-pixel-processor/issues"
+  },
+  "homepage": "https://github.com/Laboralphy/o876-pixel-processor#readme"
+}

@@ -155,19 +155,28 @@ class PixelProcessor {
 
     static paint(oCanvas, cb, region = undefined) {
         if (oCanvas === null) {
-            if (('x' in region) && region.x !== 0) {
-                throw new Error('region.x must be set to 0 when "canvas" parameter is null');
+            if (region !== undefined && region !== null) {
+                // region not null : x and y must be 0
+                if (('x' in region) && region.x !== 0) {
+                    throw new Error('region.x must be set to 0 when "canvas" parameter is null');
+                } else {
+                    region.x = 0;
+                }
+                if (('y' in region) && region.y !== 0) {
+                    throw new Error('region.y must be set to 0 when "canvas" parameter is null');
+                } else {
+                    region.y = 0;
+                }
+                oCanvas = document.createElement('canvas');
+                oCanvas.width = region.width;
+                oCanvas.height = region.height;
             } else {
-                region.x = 0;
+                throw new Error('either canvas or region must be defined')
             }
-            if (('y' in region) && region.y !== 0) {
-                throw new Error('region.y must be set to 0 when "canvas" parameter is null');
-            } else {
-                region.y = 0;
+        } else {
+            if (region === undefined || region === null) {
+                region = {x: 0, y: 0, width: oCanvas.width, height: oCanvas.height};
             }
-            oCanvas = document.createElement('canvas');
-            oCanvas.width = region.width;
-            oCanvas.height = region.height;
         }
         PixelProcessor._process(oCanvas, PP_METHOD_CREATE, cb, region);
         return oCanvas;

@@ -1,3 +1,7 @@
+const PP_METHOD_CREATE = 0;
+const PP_METHOD_GET = 1;
+
+
 /**
  * @typedef {object} Region
  * @property [x {number}]
@@ -41,63 +45,12 @@ class PixelProcessor {
         };
     }
 
-    /**
-     *
-     * @param oCanvas {HTMLCanvasElement}
-     * @param cb {function({
-     *  canvas: {
-     *      width: number,
-     *      height: number
-     *  },
-     *  region: {
-     *      x: number,
-     *      y: number
-     *      width: number,
-     *      height: number
-     *  }
-     *  x: number,
-     *  y: number,
-     *  color: {
-     *      r: number,
-     *      g: number,
-     *      b: number,
-     *      a: number
-     *  },
-     *  pixel: function(x: number, y: number)
-     *  })} callback
-     * @param region {Region}
-     */
-    static process(oCanvas, cb, region = undefined) {
-        let oImageData;
-        let ctx;
-        if (oCanvas !== null) {
-            let h = oCanvas.height;
-            let w = oCanvas.width;
-            if (region === undefined || region === null) {
-                region = {x: 0, y: 0, width: w, height: h};
-            }
-            region = PixelProcessor.fit(w, h, region);
-
-            ctx = oCanvas.getContext('2d');
-            oImageData = ctx.getImageData(region.x, region.y, region.width, region.height);
-        } else {
-            if (('x' in region) && region.x !== 0) {
-                throw new Error('region.x must be set to 0 when "canvas" parameter is null');
-            } else {
-                region.x = 0;
-            }
-            if (('y' in region) && region.y !== 0) {
-                throw new Error('region.y must be set to 0 when "canvas" parameter is null');
-            } else {
-                region.y = 0;
-            }
-            oCanvas = document.createElement('canvas');
-            oCanvas.width = region.width;
-            oCanvas.height = region.height;
-            ctx = oCanvas.getContext('2d');
-            oImageData = ctx.createImageData(region.width, region.height);
-        }
-        let pixels = oImageData.data;
+    static _process(oCanvas, nMethod, cb, region) {
+        const ctx = oCanvas.getContext('2d');
+        const oImageData = nMethod === 0
+            ? ctx.createImageData(region.width, region.height)
+            : ctx.getImageData(region.x, region.y, region.width, region.height);
+        const pixels = oImageData.data;
         const hReg = region.height;
         const wReg = region.width;
 
@@ -161,6 +114,62 @@ class PixelProcessor {
             pixels[offset + 3] = a;
         });
         ctx.putImageData(oImageData, region.x, region.y);
+    }
+
+    /**
+     *
+     * @param oCanvas {HTMLCanvasElement}
+     * @param cb {function({
+     *  canvas: {
+     *      width: number,
+     *      height: number
+     *  },
+     *  region: {
+     *      x: number,
+     *      y: number
+     *      width: number,
+     *      height: number
+     *  }
+     *  x: number,
+     *  y: number,
+     *  color: {
+     *      r: number,
+     *      g: number,
+     *      b: number,
+     *      a: number
+     *  },
+     *  pixel: function(x: number, y: number)
+     *  })} callback
+     * @param region {Region}
+     */
+    static filter(oCanvas, cb, region = undefined) {
+        let h = oCanvas.height;
+        let w = oCanvas.width;
+        if (region === undefined || region === null) {
+            region = {x: 0, y: 0, width: w, height: h};
+        }
+        region = PixelProcessor.fit(w, h, region);
+        PixelProcessor._process(oCanvas, PP_METHOD_GET, cb, region);
+        return oCanvas;
+    }
+
+    static paint(oCanvas, cb, region = undefined) {
+        if (oCanvas === null) {
+            if (('x' in region) && region.x !== 0) {
+                throw new Error('region.x must be set to 0 when "canvas" parameter is null');
+            } else {
+                region.x = 0;
+            }
+            if (('y' in region) && region.y !== 0) {
+                throw new Error('region.y must be set to 0 when "canvas" parameter is null');
+            } else {
+                region.y = 0;
+            }
+            oCanvas = document.createElement('canvas');
+            oCanvas.width = region.width;
+            oCanvas.height = region.height;
+        }
+        PixelProcessor._process(oCanvas, PP_METHOD_CREATE, cb, region);
         return oCanvas;
     }
 }

@@ -12,19 +12,19 @@ function main() {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, cvs.width, cvs.height);
 
-    PixelProcessor.process(cvs, function(pctx) {
+    PixelProcessor.filter(cvs, function(pctx) {
         pctx.color.r |= 255 * pctx.x / pctx.region.width;
         pctx.color.g |= 0;
         pctx.color.b |= 0;
         pctx.color.a |= 255;
     }, {x: -200, y: -20, width: 400, height: 300}); //{x: -20, y: -15, width: 127, height: 127}
-    PixelProcessor.process(cvs, function(pctx) {
+    PixelProcessor.filter(cvs, function(pctx) {
         pctx.color.r |= 0;
         pctx.color.g |= 255 * pctx.y / pctx.region.height;
         pctx.color.b |= 0;
         pctx.color.a |= 255;
     }, {x: 0, y: 0, width: 300, height: 200}); //{x: -20, y: -15, width: 127, height: 127}
-    const cvs2 = PixelProcessor.process(null, function(pctx) {
+    const cvs2 = PixelProcessor.paint(null, function(pctx) {
         pctx.color.r = 0;
         pctx.color.g = 255 - 255 * pctx.x / pctx.region.height;
         pctx.color.b = 255 - 255 * pctx.y / pctx.region.height;

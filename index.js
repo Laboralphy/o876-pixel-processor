@@ -7,6 +7,10 @@
  */
 class PixelProcessor {
 
+    constructor() {
+
+    }
+
     /**
      * Create a new region that fit inside the given canvas dimensions
      * @param width {number}
@@ -162,6 +166,35 @@ class PixelProcessor {
         });
         ctx.putImageData(oImageData, region.x, region.y);
         return oCanvas;
+    }
+
+    createShader(gl, type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+        if (success) {
+            return shader;
+        }
+        console.info(gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        return null;
+    }
+
+    createProgram(gl, fragmentShader) {
+        const program = gl.createProgram();
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
+        const success = gl.getProgramParameter(program, gl.LINK_STATUS);
+        if (success) {
+            return program;
+        }
+        console.info(gl.getProgramInfoLog(program));
+        gl.deleteProgram(program);
+        return null;
+    }
+
+    processShader(oCanvas, oFragment) {
     }
 }
 

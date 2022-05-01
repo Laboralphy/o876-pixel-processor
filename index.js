@@ -1,18 +1,33 @@
 const PP_METHOD_CREATE = 0;
 const PP_METHOD_GET = 1;
 
-
 /**
- * @typedef {object} Region
+ * @typedef Region {object}
  * @property [x {number}]
  * @property [y {number}]
  * @property width {number}
  * @property height {number}
+ *
+ * @typedef Color {object}
+ * @property r {number}
+ * @property g {number}
+ * @property b {number}
+ * @property a {number}
+ *
+ * @typedef PixelContext {object}
+ * @property canvas {Canvas}
+ * @property region {Region}
+ * @property x {number}
+ * @property y {number}
+ * @property color {Color}
+ * @property pixel {function}
  */
+
 class PixelProcessor {
 
     /**
      * Create a new region that fit inside the given canvas dimensions
+     * The region limits will never outbound the given width and height
      * @param width {number}
      * @param height {number}
      * @param region {Region}
@@ -117,30 +132,11 @@ class PixelProcessor {
     }
 
     /**
-     *
+     * Use an existing canvas
+     * read README.md
      * @param oCanvas {HTMLCanvasElement}
-     * @param cb {function({
-     *  canvas: {
-     *      width: number,
-     *      height: number
-     *  },
-     *  region: {
-     *      x: number,
-     *      y: number
-     *      width: number,
-     *      height: number
-     *  }
-     *  x: number,
-     *  y: number,
-     *  color: {
-     *      r: number,
-     *      g: number,
-     *      b: number,
-     *      a: number
-     *  },
-     *  pixel: function(x: number, y: number)
-     *  })} callback
-     * @param region {Region}
+     * @param cb {function(PixelContext)} callback
+     * @param region {Region|undefined}
      */
     static filter(oCanvas, cb, region = undefined) {
         let h = oCanvas.height;
@@ -153,6 +149,13 @@ class PixelProcessor {
         return oCanvas;
     }
 
+    /**
+     * read README.md
+     * @param oCanvas {HTMLCanvasElement}
+     * @param cb {function(PixelContext)} callback
+     * @param region {Region|undefined}
+     * @returns {HTMLCanvasElement}
+     */
     static paint(oCanvas, cb, region = undefined) {
         if (oCanvas === null) {
             if (region !== undefined && region !== null) {

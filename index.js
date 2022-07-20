@@ -131,6 +131,55 @@ class PixelProcessor {
         ctx.putImageData(oImageData, region.x, region.y);
     }
 
+    static _process32(oCanvas, nMethod, cb, region) {
+        const ctx = oCanvas.getContext('2d');
+        const oImageData = nMethod === 0
+            ? ctx.createImageData(region.width, region.height)
+            : ctx.getImageData(region.x, region.y, region.width, region.height);
+        const pixels = oImageData.data;
+        const pixels32 = new Uint32Array(pixels.buffer);
+        const hReg = region.height;
+        const wReg = region.width;
+
+        let oPixelCtx = {
+            canvas: {
+                width: oCanvas.width,
+                height: oCanvas.height
+            },
+            region: {
+                x: region.x,
+                y: region.y,
+                width: region.width,
+                height: region.height
+            },
+            x: 0,
+            y: 0,
+            color: 0,
+            pixel: (x, y) => {
+                let nOffset = y * wReg + x;
+                return pixels32[nOffset];
+            }
+        };
+        let aColors = [];
+        for (let y = 0; y < hReg; ++y) {
+            for (let x = 0; x < wReg; ++x) {
+                let nOffset = y * wReg + x;
+                oPixelCtx.x = x;
+                oPixelCtx.y = y;
+                oPixelCtx.color = pixels32[nOffset];
+                cb(oPixelCtx);
+                if (!oPixelCtx.color) {
+                    throw new Error('pixelprocessor : callback destroyed the color');
+                }
+                aColors.push([nOffset, oPixelCtx.color]);
+            }
+        }
+        aColors.forEach(([offset, color]) => {
+            pixels32[offset] = color;
+        });
+        ctx.putImageData(oImageData, region.x, region.y);
+    }
+
     /**
      * Use an existing canvas
      * read README.md
@@ -138,15 +187,27 @@ class PixelProcessor {
      * @param cb {function(PixelContext)} callback
      * @param region {Region|undefined}
      */
-    static filter(oCanvas, cb, region = undefined) {
+    static _filter(oCanvas, cb, region = undefined, bFast = false) {
         let h = oCanvas.height;
         let w = oCanvas.width;
         if (region === undefined || region === null) {
             region = {x: 0, y: 0, width: w, height: h};
         }
         region = PixelProcessor.fit(w, h, region);
-        PixelProcessor._process(oCanvas, PP_METHOD_GET, cb, region);
+        if (bFast) {
+            PixelProcessor._process32(oCanvas, PP_METHOD_GET, cb, region);
+        } else {
+            PixelProcessor._process(oCanvas, PP_METHOD_GET, cb, region);
+        }
         return oCanvas;
+    }
+
+    static_filter(oCanvas, cb, region = undefined) {
+        return PixelProcessor._filter(oCanvas, cb, region, false)
+    }
+
+    static fastFilter(oCanvas, cb, region = undefined) {
+        return PixelProcessor._filter(oCanvas, cb, region, true)
     }
 
     /**
@@ -156,7 +217,7 @@ class PixelProcessor {
      * @param region {Region|undefined}
      * @returns {HTMLCanvasElement}
      */
-    static paint(oCanvas, cb, region = undefined) {
+    static _paint(oCanvas, cb, region = undefined, bFast = false) {
         if (oCanvas === null) {
             if (region !== undefined && region !== null) {
                 // region not null : x and y must be 0
@@ -181,8 +242,20 @@ class PixelProcessor {
                 region = {x: 0, y: 0, width: oCanvas.width, height: oCanvas.height};
             }
         }
-        PixelProcessor._process(oCanvas, PP_METHOD_CREATE, cb, region);
+        if (bFast) {
+            PixelProcessor._process32(oCanvas, PP_METHOD_CREATE, cb, region);
+        } else {
+            PixelProcessor._process(oCanvas, PP_METHOD_CREATE, cb, region);
+        }
         return oCanvas;
+    }
+
+    static paint(oCanvas, cb, region = undefined) {
+        return PixelProcessor._paint(oCanvas, cb, region, false)
+    }
+
+    static fastPaint(oCanvas, cb, region = undefined) {
+        return PixelProcessor._paint(oCanvas, cb, region, true)
     }
 }
 

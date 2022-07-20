@@ -1,6 +1,6 @@
 {
   "name": "@laboralphy/pixel-processor",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "The pixel processor is used to apply a callback function to each pixel of an existing canvas, or a newly created one.",
   "main": "index.js",
   "directories": {

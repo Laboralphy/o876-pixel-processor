@@ -62,3 +62,10 @@ The provided callback function brings a processor context as parameter. The cont
     pixel: function(x: number, y: number) // a function that can retrieve another pixel color
 }
 ``` 
+
+### Fast Processing
+_from version 1.1.0_
+
+The fast processing mode will use 32bits color values instead of { r, g, b, a } structures.
+
+To activate fast processing mode, use _fastPaint_ instead of _paint_, and _fastFilter_ instead of _filter_.
